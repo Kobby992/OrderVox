@@ -1,26 +1,69 @@
 /**
- * Ordervox admin app entry. The setup wizard and settings screens arrive in Phase 1.
+ * Ordervox admin app: dashboard, setup wizard and message log.
  */
-import { createRoot } from '@wordpress/element';
+import { createRoot, useEffect, useState } from '@wordpress/element';
+import { Spinner, TabPanel } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Card, CardBody, Notice } from '@wordpress/components';
+
+import { getSettings } from './api';
+import Dashboard from './components/Dashboard';
+import MessageLog from './components/MessageLog';
+import SetupWizard from './components/SetupWizard';
 
 import './admin.scss';
 
+const TABS = [
+	{ name: 'dashboard', title: __( 'Dashboard', 'ordervox' ) },
+	{ name: 'setup', title: __( 'Setup', 'ordervox' ) },
+	{ name: 'log', title: __( 'Message log', 'ordervox' ) },
+];
+
 function App() {
+	const [ initialTab, setInitialTab ] = useState( null );
+	// Changing the key remounts TabPanel so it opens on initialTab.
+	const [ panelKey, setPanelKey ] = useState( 0 );
+
+	useEffect( () => {
+		getSettings()
+			.then( ( data ) =>
+				setInitialTab( data.configured ? 'dashboard' : 'setup' )
+			)
+			.catch( () => setInitialTab( 'dashboard' ) );
+	}, [] );
+
+	const openTab = ( name ) => {
+		setInitialTab( name );
+		setPanelKey( panelKey + 1 );
+	};
+
 	return (
 		<div className="ordervox-admin">
 			<h1>{ __( 'Ordervox', 'ordervox' ) }</h1>
-			<Card>
-				<CardBody>
-					<Notice status="info" isDismissible={ false }>
-						{ __(
-							'Ordervox is installed. The WhatsApp connection wizard is coming soon.',
-							'ordervox'
-						) }
-					</Notice>
-				</CardBody>
-			</Card>
+			{ ! initialTab ? (
+				<Spinner />
+			) : (
+				<TabPanel
+					key={ panelKey }
+					tabs={ TABS }
+					initialTabName={ initialTab }
+				>
+					{ ( tab ) => (
+						<div className="ordervox-tab">
+							{ tab.name === 'dashboard' && (
+								<Dashboard
+									onOpenSetup={ () => openTab( 'setup' ) }
+								/>
+							) }
+							{ tab.name === 'setup' && (
+								<SetupWizard
+									onDone={ () => openTab( 'dashboard' ) }
+								/>
+							) }
+							{ tab.name === 'log' && <MessageLog /> }
+						</div>
+					) }
+				</TabPanel>
+			) }
 		</div>
 	);
 }
