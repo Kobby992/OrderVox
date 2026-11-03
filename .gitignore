@@ -7,3 +7,5 @@
 .DS_Store
 /strauss.phar
 /dist/
+/.preview/
+/.claude/launch.json

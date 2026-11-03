@@ -28,6 +28,25 @@ import TemplateEditor from './TemplateEditor';
  * @param {Object} alert Alert from the API.
  * @return {string} Status key.
  */
+/**
+ * Colour and Dashicon per alert. Colours follow meaning: violet for new orders, teal for money
+ * in and success, sky for progress, rose for problems, amber for stock and reviews.
+ */
+const LOOK = {
+	order_new: { hue: 'violet', icon: 'cart' },
+	payment_received: { hue: 'teal', icon: 'money-alt' },
+	status_processing: { hue: 'sky', icon: 'update' },
+	status_completed: { hue: 'teal', icon: 'yes-alt' },
+	status_cancelled: { hue: 'rose', icon: 'dismiss' },
+	status_refunded: { hue: 'coral', icon: 'undo' },
+	payment_failed: { hue: 'rose', icon: 'warning' },
+	stock_low: { hue: 'amber', icon: 'archive' },
+	review_new: { hue: 'amber', icon: 'star-filled' },
+	daily_summary: { hue: 'indigo', icon: 'chart-bar' },
+	customer_order_confirmed: { hue: 'violet', icon: 'format-chat' },
+	customer_order_completed: { hue: 'teal', icon: 'smiley' },
+};
+
 const templateStatus = ( alert ) => {
 	if ( alert.active ) {
 		return 'APPROVED';
@@ -113,8 +132,21 @@ export default function Alerts() {
 	const missing = data.alerts.filter( ( a ) => ! a.submitted && ! a.active );
 	const customer = data.customer || {};
 
-	const renderAlert = ( alert ) => (
-		<li key={ alert.key }>
+	const renderAlert = ( alert, index ) => (
+		<li
+			key={ alert.key }
+			className={
+				`ovx-alert ovx-hue--${ LOOK[ alert.key ]?.hue || 'indigo' }` +
+				( alert.enabled ? ' is-on' : '' )
+			}
+			style={ { '--ovx-delay': `${ index * 40 }ms` } }
+		>
+			<span
+				className={ `ovx-alert__icon dashicons dashicons-${
+					LOOK[ alert.key ]?.icon || 'bell'
+				}` }
+				aria-hidden="true"
+			/>
 			<ToggleControl
 				label={ alert.label }
 				help={ alert.description }
@@ -123,7 +155,7 @@ export default function Alerts() {
 				onChange={ ( enabled ) => toggle( alert, enabled ) }
 				__nextHasNoMarginBottom
 			/>
-			<div className="ordervox-alerts__meta">
+			<div className="ovx-alert__meta">
 				<StatusBadge status={ templateStatus( alert ) } />
 				{ alert.submitted && alert.changed && (
 					<span className="description">
@@ -138,7 +170,7 @@ export default function Alerts() {
 				</Button>
 			</div>
 			{ alert.key === 'daily_summary' && alert.enabled && (
-				<div className="ordervox-alerts__time">
+				<div className="ovx-alert__time">
 					<TextControl
 						label={ __( 'Send at (site time)', 'ordervox' ) }
 						type="time"
@@ -168,10 +200,10 @@ export default function Alerts() {
 				</Notice>
 			) }
 
-			<Card>
+			<Card className="ovx-card ovx-card--indigo">
 				<CardHeader>
 					<h2>{ __( 'WhatsApp templates', 'ordervox' ) }</h2>
-					<div className="ordervox-actions">
+					<div className="ovx-actions">
 						<Button
 							variant="secondary"
 							disabled={ busy }
@@ -241,12 +273,12 @@ export default function Alerts() {
 				</CardBody>
 			</Card>
 
-			<Card>
+			<Card className="ovx-card ovx-card--violet">
 				<CardHeader>
 					<h2>{ __( 'Store alerts', 'ordervox' ) }</h2>
 				</CardHeader>
 				<CardBody>
-					<ul className="ordervox-alerts">
+					<ul className="ovx-alert-grid">
 						{ data.alerts
 							.filter( ( a ) => a.audience === 'store' )
 							.map( renderAlert ) }
@@ -254,7 +286,7 @@ export default function Alerts() {
 				</CardBody>
 			</Card>
 
-			<Card>
+			<Card className="ovx-card ovx-card--teal">
 				<CardHeader>
 					<h2>{ __( 'Customer messages', 'ordervox' ) }</h2>
 				</CardHeader>
@@ -282,7 +314,7 @@ export default function Alerts() {
 						__nextHasNoMarginBottom
 					/>
 					{ customer.optin_enabled && (
-						<div className="ordervox-optin-settings">
+						<div className="ovx-optin-settings">
 							<TextControl
 								label={ __( 'Checkbox text', 'ordervox' ) }
 								placeholder={ __(
@@ -321,7 +353,7 @@ export default function Alerts() {
 							/>
 						</div>
 					) }
-					<ul className="ordervox-alerts">
+					<ul className="ovx-alert-grid">
 						{ data.alerts
 							.filter( ( a ) => a.audience === 'customer' )
 							.map( renderAlert ) }

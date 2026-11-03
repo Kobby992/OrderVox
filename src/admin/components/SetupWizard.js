@@ -246,7 +246,7 @@ export default function SetupWizard( { onDone } ) {
 	const lastReceived = data.webhook.last_received;
 
 	return (
-		<Card className="ordervox-wizard">
+		<Card className="ordervox-wizard ovx-card ovx-card--indigo">
 			<CardHeader>
 				<ol className="ordervox-steps">
 					{ STEPS.map( ( label, index ) => (
@@ -262,9 +262,16 @@ export default function SetupWizard( { onDone } ) {
 						</li>
 					) ) }
 				</ol>
+				<div className="ovx-progress" aria-hidden="true">
+					<span
+						style={ {
+							transform: `scaleX(${ step / ( STEPS.length - 1 ) })`,
+						} }
+					/>
+				</div>
 			</CardHeader>
 
-			<CardBody>
+			<CardBody key={ step } className="ovx-step">
 				{ error && (
 					<Notice status="error" isDismissible={ false }>
 						{ error }

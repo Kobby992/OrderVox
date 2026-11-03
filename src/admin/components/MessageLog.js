@@ -55,9 +55,9 @@ export default function MessageLog() {
 		: 1;
 
 	return (
-		<Card>
+		<Card className="ovx-card ovx-card--sky">
 			<CardBody>
-				<div className="ordervox-toolbar">
+				<div className="ovx-toolbar">
 					<SelectControl
 						label={ __( 'Status', 'ordervox' ) }
 						hideLabelFromVision
@@ -91,7 +91,7 @@ export default function MessageLog() {
 				) }
 
 				{ result && result.items.length > 0 && (
-					<table className="widefat striped ordervox-log">
+					<table className="ovx-log">
 						<thead>
 							<tr>
 								<th>{ __( 'Time', 'ordervox' ) }</th>
@@ -107,8 +107,13 @@ export default function MessageLog() {
 							</tr>
 						</thead>
 						<tbody>
-							{ result.items.map( ( row ) => (
-								<tr key={ row.id }>
+							{ result.items.map( ( row, index ) => (
+								<tr
+									key={ row.id }
+									style={ {
+										'--ovx-delay': `${ Math.min( index, 12 ) * 25 }ms`,
+									} }
+								>
 									<td>
 										{ new Date(
 											row.created_at
@@ -130,7 +135,7 @@ export default function MessageLog() {
 									<td>
 										<StatusBadge status={ row.status } />
 										{ row.error_message && (
-											<div className="ordervox-log__error">
+											<div className="ovx-log__error">
 												{ row.error_message }
 											</div>
 										) }
@@ -154,7 +159,7 @@ export default function MessageLog() {
 				) }
 
 				{ result && pages > 1 && (
-					<div className="ordervox-pagination">
+					<div className="ovx-pagination">
 						<Button
 							variant="secondary"
 							disabled={ page <= 1 }
