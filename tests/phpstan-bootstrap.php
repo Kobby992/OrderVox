@@ -5,7 +5,7 @@
  * @package Ordervox
  */
 
-define( 'ORDERVOX_VERSION', '1.0.0' );
+define( 'ORDERVOX_VERSION', '1.0.1' );
 define( 'ORDERVOX_FILE', dirname( __DIR__ ) . '/ordervox.php' );
 define( 'ORDERVOX_PATH', dirname( __DIR__ ) . '/' );
 define( 'ORDERVOX_URL', 'https://example.test/wp-content/plugins/ordervox/' );

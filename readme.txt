@@ -5,7 +5,7 @@ Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
 Requires Plugins: woocommerce
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -128,6 +128,9 @@ Templates can be created in any language WhatsApp supports. The default text fol
 7. WhatsApp messages on the order screen.
 
 == Changelog ==
+
+= 1.0.1 =
+* Refreshed admin design: colour-coded alert cards, sliding tabs, page transitions and animated statistics, with reduced-motion support.
 
 = 1.0.0 =
 * First public release: store alerts, daily summary, customer opt-in and order updates, STOP handling, template management, message log, health checks.

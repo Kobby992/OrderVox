@@ -1,6 +1,6 @@
 {
 	"name": "ordervox",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"private": true,
 	"description": "Order notifications via WhatsApp for WooCommerce.",
 	"author": "Webbcode Studios",
