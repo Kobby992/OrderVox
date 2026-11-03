@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Migrator {
 
-	public const DB_VERSION = 1;
+	public const DB_VERSION = 2;
 	public const OPTION     = 'ordervox_db_version';
 
 	/**
@@ -76,6 +76,12 @@ CREATE TABLE {$prefix}webhook_events (
   PRIMARY KEY  (id),
   UNIQUE KEY meta_id (meta_id),
   KEY received_at (received_at)
+) {$charset};
+CREATE TABLE {$prefix}optouts (
+  phone_hash char(64) NOT NULL,
+  source varchar(16) NOT NULL DEFAULT '',
+  created_at datetime NOT NULL,
+  PRIMARY KEY  (phone_hash)
 ) {$charset};"
 		);
 
@@ -92,6 +98,7 @@ CREATE TABLE {$prefix}webhook_events (
 		return array(
 			$wpdb->prefix . 'ordervox_messages',
 			$wpdb->prefix . 'ordervox_webhook_events',
+			$wpdb->prefix . 'ordervox_optouts',
 		);
 	}
 }

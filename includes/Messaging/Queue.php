@@ -9,6 +9,7 @@ namespace Webbcode\Ordervox\Messaging;
 
 use Webbcode\Ordervox\Api\ApiException;
 use Webbcode\Ordervox\Api\WhatsAppApi;
+use Webbcode\Ordervox\Customer\OptOuts;
 use Webbcode\Ordervox\Log\MessageRepository;
 
 defined( 'ABSPATH' ) || exit;
@@ -41,14 +42,23 @@ final class Queue {
 	private WhatsAppApi $api;
 
 	/**
+	 * Opt-out list, checked right before each customer message.
+	 *
+	 * @var OptOuts|null
+	 */
+	private ?OptOuts $optouts;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param MessageRepository $messages Message log.
 	 * @param WhatsAppApi       $api      Cloud API.
+	 * @param OptOuts|null      $optouts  Opt-out list.
 	 */
-	public function __construct( MessageRepository $messages, WhatsAppApi $api ) {
+	public function __construct( MessageRepository $messages, WhatsAppApi $api, ?OptOuts $optouts = null ) {
 		$this->messages = $messages;
 		$this->api      = $api;
+		$this->optouts  = $optouts;
 	}
 
 	/**
@@ -84,6 +94,18 @@ final class Queue {
 		$row    = $this->messages->find( $log_id );
 		if ( null === $row || 'queued' !== $row['status'] ) {
 			return $row;
+		}
+
+		// Customers who unsubscribed after this was queued are never messaged.
+		if ( 'customer' === $row['recipient_type'] && null !== $this->optouts && $this->optouts->is_opted_out( (string) $row['recipient_phone'] ) ) {
+			$this->messages->update(
+				$log_id,
+				array(
+					'status'        => 'cancelled',
+					'error_message' => __( 'Cancelled because the customer unsubscribed.', 'ordervox' ),
+				)
+			);
+			return $this->messages->find( $log_id );
 		}
 
 		$attempts = (int) $row['attempts'] + 1;

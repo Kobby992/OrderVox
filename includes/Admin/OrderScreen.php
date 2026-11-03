@@ -185,6 +185,7 @@ final class OrderScreen {
 			'delivered' => __( 'Delivered', 'ordervox' ),
 			'read'      => __( 'Read', 'ordervox' ),
 			'failed'    => __( 'Failed', 'ordervox' ),
+			'cancelled' => __( 'Cancelled', 'ordervox' ),
 		);
 		return sprintf(
 			'<span class="ordervox-badge ordervox-badge--%1$s">%2$s</span>',

@@ -36,7 +36,7 @@ class TemplateRepository {
 		$entry = $this->load()[ $alert ][ $language ] ?? array();
 		return array(
 			'body'      => (string) ( $entry['body'] ?? Defaults::body( $alert ) ),
-			'footer'    => (string) ( $entry['footer'] ?? Defaults::footer() ),
+			'footer'    => (string) ( $entry['footer'] ?? Defaults::footer( $alert ) ),
 			'submitted' => is_array( $entry['submitted'] ?? null ) ? $entry['submitted'] : null,
 			'active'    => is_array( $entry['active'] ?? null ) ? $entry['active'] : null,
 		);
@@ -80,7 +80,7 @@ class TemplateRepository {
 	 * @param string $language Template language.
 	 */
 	public function reset( string $alert, string $language ): void {
-		$this->save_draft( $alert, $language, Defaults::body( $alert ), Defaults::footer() );
+		$this->save_draft( $alert, $language, Defaults::body( $alert ), Defaults::footer( $alert ) );
 	}
 
 	/**

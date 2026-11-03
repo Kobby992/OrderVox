@@ -16,6 +16,7 @@ const LABELS = {
 	PAUSED: __( 'Paused', 'ordervox' ),
 	DISABLED: __( 'Disabled', 'ordervox' ),
 	none: __( 'Not created', 'ordervox' ),
+	cancelled: __( 'Cancelled', 'ordervox' ),
 };
 
 /**

@@ -131,10 +131,10 @@ final class AlertsController {
 		foreach ( Defaults::ALERTS as $alert ) {
 			$alerts[] = array_merge(
 				array(
-					'key'     => $alert,
-					'enabled' => 'daily_summary' === $alert
-						? (bool) $this->settings->get( 'daily_summary.enabled', false )
-						: $this->settings->is_event_enabled( $alert ),
+					'key'      => $alert,
+					'enabled'  => (bool) $this->settings->get( Defaults::setting( $alert ), false ),
+					'setting'  => Defaults::setting( $alert ),
+					'audience' => Defaults::is_customer( $alert ) ? 'customer' : 'store',
 				),
 				Defaults::describe( $alert ),
 				$this->template_state( $alert, $language )
@@ -146,6 +146,7 @@ final class AlertsController {
 				'language'      => $language,
 				'languages'     => Language::codes(),
 				'daily_summary' => $this->settings->get( 'daily_summary' ),
+				'customer'      => $this->settings->get( 'customer' ),
 				'alerts'        => $alerts,
 			)
 		);

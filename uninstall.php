@@ -18,7 +18,7 @@ function ordervox_uninstall_site() {
 		return;
 	}
 
-	foreach ( array( 'ordervox_messages', 'ordervox_webhook_events' ) as $table ) {
+	foreach ( array( 'ordervox_messages', 'ordervox_webhook_events', 'ordervox_optouts' ) as $table ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Dropping our own tables on uninstall.
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . $table ) );
 	}

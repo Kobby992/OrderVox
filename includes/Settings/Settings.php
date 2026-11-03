@@ -55,6 +55,7 @@ final class Settings {
 			'customer'                 => array(
 				'optin_enabled'    => false,
 				'optin_label'      => '',
+				'marketing_optin'  => false,
 				'notify_confirmed' => false,
 				'notify_completed' => false,
 			),

@@ -10,6 +10,12 @@ namespace Webbcode\Ordervox;
 use Webbcode\Ordervox\Admin\Menu;
 use Webbcode\Ordervox\Admin\OrderScreen;
 use Webbcode\Ordervox\Api\WhatsAppApi;
+use Webbcode\Ordervox\Customer\Account;
+use Webbcode\Ordervox\Customer\Checkout;
+use Webbcode\Ordervox\Customer\Consent;
+use Webbcode\Ordervox\Customer\CustomerEvents;
+use Webbcode\Ordervox\Customer\Keywords;
+use Webbcode\Ordervox\Customer\OptOuts;
 use Webbcode\Ordervox\Events\CatalogEvents;
 use Webbcode\Ordervox\Events\DailySummary;
 use Webbcode\Ordervox\Events\EventSender;
@@ -21,6 +27,7 @@ use Webbcode\Ordervox\Messaging\Dispatcher;
 use Webbcode\Ordervox\Messaging\Queue;
 use Webbcode\Ordervox\Migrations\Migrator;
 use Webbcode\Ordervox\Placeholders\Registry;
+use Webbcode\Ordervox\Privacy\Privacy;
 use Webbcode\Ordervox\Rest\AdminController;
 use Webbcode\Ordervox\Rest\AlertsController;
 use Webbcode\Ordervox\Settings\Credentials;
@@ -98,6 +105,12 @@ final class Plugin {
 		$this->daily_summary()->register();
 		( new AlertsController( $this->settings(), $this->templates(), $this->template_manager(), $this->placeholders(), $this->daily_summary() ) )->register();
 
+		( new Checkout( $this->consent() ) )->register();
+		( new Account( $this->consent() ) )->register();
+		( new CustomerEvents( $this->event_sender() ) )->register();
+		( new Keywords( $this->optouts(), $this->messages(), $this->api() ) )->register();
+		( new Privacy( $this->consent(), $this->messages(), $this->optouts() ) )->register();
+
 		if ( is_admin() ) {
 			( new Menu() )->register();
 			( new OrderScreen( $this->messages() ) )->register();
@@ -143,7 +156,21 @@ final class Plugin {
 	 * Background send queue.
 	 */
 	public function queue(): Queue {
-		return $this->service( 'queue', fn() => new Queue( $this->messages(), $this->api() ) );
+		return $this->service( 'queue', fn() => new Queue( $this->messages(), $this->api(), $this->optouts() ) );
+	}
+
+	/**
+	 * Customer opt-out list.
+	 */
+	public function optouts(): OptOuts {
+		return $this->service( 'optouts', static fn() => new OptOuts() );
+	}
+
+	/**
+	 * Customer consent.
+	 */
+	public function consent(): Consent {
+		return $this->service( 'consent', fn() => new Consent( $this->settings(), $this->optouts() ) );
 	}
 
 	/**
@@ -185,7 +212,7 @@ final class Plugin {
 	 * Sends store alerts.
 	 */
 	public function event_sender(): EventSender {
-		return $this->service( 'event_sender', fn() => new EventSender( $this->settings(), $this->templates(), $this->placeholders(), $this->dispatcher(), $this->messages() ) );
+		return $this->service( 'event_sender', fn() => new EventSender( $this->settings(), $this->templates(), $this->placeholders(), $this->dispatcher(), $this->messages(), $this->consent() ) );
 	}
 
 	/**

@@ -7,12 +7,14 @@
 
 namespace Webbcode\Ordervox\Events;
 
+use Webbcode\Ordervox\Customer\Consent;
 use Webbcode\Ordervox\Log\MessageRepository;
 use Webbcode\Ordervox\Messaging\Dispatcher;
 use Webbcode\Ordervox\Messaging\OutboundMessage;
 use Webbcode\Ordervox\Placeholders\Registry;
 use Webbcode\Ordervox\Settings\Settings;
 use Webbcode\Ordervox\Templates\Compiler;
+use Webbcode\Ordervox\Templates\Defaults;
 use Webbcode\Ordervox\Templates\Language;
 use Webbcode\Ordervox\Templates\TemplateRepository;
 
@@ -59,6 +61,13 @@ final class EventSender {
 	private MessageRepository $messages;
 
 	/**
+	 * Customer consent.
+	 *
+	 * @var Consent|null
+	 */
+	private ?Consent $consent;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Settings           $settings     Settings.
@@ -66,13 +75,15 @@ final class EventSender {
 	 * @param Registry           $placeholders Placeholders.
 	 * @param Dispatcher         $dispatcher   Dispatcher.
 	 * @param MessageRepository  $messages     Message log.
+	 * @param Consent|null       $consent      Customer consent; without it customer alerts go nowhere.
 	 */
-	public function __construct( Settings $settings, TemplateRepository $templates, Registry $placeholders, Dispatcher $dispatcher, MessageRepository $messages ) {
+	public function __construct( Settings $settings, TemplateRepository $templates, Registry $placeholders, Dispatcher $dispatcher, MessageRepository $messages, ?Consent $consent = null ) {
 		$this->settings     = $settings;
 		$this->templates    = $templates;
 		$this->placeholders = $placeholders;
 		$this->dispatcher   = $dispatcher;
 		$this->messages     = $messages;
+		$this->consent      = $consent;
 	}
 
 	/**
@@ -81,10 +92,7 @@ final class EventSender {
 	 * @param string $alert Alert key.
 	 */
 	public function is_enabled( string $alert ): bool {
-		if ( 'daily_summary' === $alert ) {
-			return (bool) $this->settings->get( 'daily_summary.enabled', false );
-		}
-		return $this->settings->is_event_enabled( $alert );
+		return (bool) $this->settings->get( Defaults::setting( $alert ), false );
 	}
 
 	/**
@@ -173,18 +181,25 @@ final class EventSender {
 	}
 
 	/**
-	 * Who receives an alert. The free plugin sends to the store owner's number; Pro adds team routing.
+	 * Who receives an alert: the store owner, or for customer alerts the customer if they consented. Pro adds team routing.
 	 *
 	 * @param string  $alert   Alert key.
 	 * @param Context $context Event data.
 	 * @return array<int, array{phone: string, type: string}>
 	 */
 	private function recipients( string $alert, Context $context ): array {
-		$owner      = (string) $this->settings->get( 'owner_phone', '' );
-		$recipients = '' !== $owner ? array(
+		if ( Defaults::is_customer( $alert ) ) {
+			$phone = null !== $this->consent && null !== $context->order ? $this->consent->recipient( $context->order ) : null;
+			$type  = 'customer';
+		} else {
+			$phone = (string) $this->settings->get( 'owner_phone', '' );
+			$type  = 'owner';
+		}
+
+		$recipients = null !== $phone && '' !== $phone ? array(
 			array(
-				'phone' => $owner,
-				'type'  => 'owner',
+				'phone' => $phone,
+				'type'  => $type,
 			),
 		) : array();
 

@@ -53,6 +53,17 @@ final class InMemoryMessages extends MessageRepository {
 		return $this->rows[ $id ] ?? null;
 	}
 
+	public function cancel_queued_for( string $e164 ): int {
+		$cancelled = 0;
+		foreach ( $this->rows as $id => $row ) {
+			if ( $row['recipient_phone'] === $e164 && 'queued' === $row['status'] ) {
+				$this->rows[ $id ]['status'] = 'cancelled';
+				++$cancelled;
+			}
+		}
+		return $cancelled;
+	}
+
 	public function find_by_wamid( string $wamid ): ?array {
 		foreach ( $this->rows as $row ) {
 			if ( $row['wamid'] === $wamid ) {

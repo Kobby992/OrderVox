@@ -45,10 +45,12 @@ export default function Alerts() {
 	const [ notice, setNotice ] = useState( '' );
 	const [ editing, setEditing ] = useState( null );
 	const [ summaryTime, setSummaryTime ] = useState( '08:00' );
+	const [ optinLabel, setOptinLabel ] = useState( '' );
 
 	const apply = ( response ) => {
 		setData( response );
 		setSummaryTime( response.daily_summary?.time || '08:00' );
+		setOptinLabel( response.customer?.optin_label || '' );
 	};
 
 	const load = () =>
@@ -83,15 +85,20 @@ export default function Alerts() {
 		}
 	};
 
-	const toggle = ( alert, enabled ) =>
+	// Saves one setting by dot path, e.g. "customer.notify_confirmed".
+	const saveSetting = ( path, value ) =>
 		run( () =>
 			saveSettings( {
-				settings:
-					alert.key === 'daily_summary'
-						? { daily_summary: { enabled } }
-						: { events: { [ alert.key ]: enabled } },
+				settings: path
+					.split( '.' )
+					.reduceRight(
+						( inner, key ) => ( { [ key ]: inner } ),
+						value
+					),
 			} )
 		);
+
+	const toggle = ( alert, enabled ) => saveSetting( alert.setting, enabled );
 
 	if ( ! data ) {
 		return error ? (
@@ -104,6 +111,49 @@ export default function Alerts() {
 	}
 
 	const missing = data.alerts.filter( ( a ) => ! a.submitted && ! a.active );
+	const customer = data.customer || {};
+
+	const renderAlert = ( alert ) => (
+		<li key={ alert.key }>
+			<ToggleControl
+				label={ alert.label }
+				help={ alert.description }
+				checked={ alert.enabled }
+				disabled={ busy }
+				onChange={ ( enabled ) => toggle( alert, enabled ) }
+				__nextHasNoMarginBottom
+			/>
+			<div className="ordervox-alerts__meta">
+				<StatusBadge status={ templateStatus( alert ) } />
+				{ alert.submitted && alert.changed && (
+					<span className="description">
+						{ __( 'Unsubmitted changes', 'ordervox' ) }
+					</span>
+				) }
+				<Button
+					variant="link"
+					onClick={ () => setEditing( alert.key ) }
+				>
+					{ __( 'Edit message', 'ordervox' ) }
+				</Button>
+			</div>
+			{ alert.key === 'daily_summary' && alert.enabled && (
+				<div className="ordervox-alerts__time">
+					<TextControl
+						label={ __( 'Send at (site time)', 'ordervox' ) }
+						type="time"
+						value={ summaryTime }
+						onChange={ setSummaryTime }
+						onBlur={ () =>
+							saveSetting( 'daily_summary.time', summaryTime )
+						}
+						__nextHasNoMarginBottom
+						__next40pxDefaultSize
+					/>
+				</div>
+			) }
+		</li>
+	);
 
 	return (
 		<>
@@ -193,72 +243,88 @@ export default function Alerts() {
 
 			<Card>
 				<CardHeader>
-					<h2>{ __( 'Alerts', 'ordervox' ) }</h2>
+					<h2>{ __( 'Store alerts', 'ordervox' ) }</h2>
 				</CardHeader>
 				<CardBody>
 					<ul className="ordervox-alerts">
-						{ data.alerts.map( ( alert ) => (
-							<li key={ alert.key }>
-								<ToggleControl
-									label={ alert.label }
-									help={ alert.description }
-									checked={ alert.enabled }
-									disabled={ busy }
-									onChange={ ( enabled ) =>
-										toggle( alert, enabled )
-									}
-									__nextHasNoMarginBottom
-								/>
-								<div className="ordervox-alerts__meta">
-									<StatusBadge
-										status={ templateStatus( alert ) }
-									/>
-									{ alert.submitted && alert.changed && (
-										<span className="description">
-											{ __(
-												'Unsubmitted changes',
-												'ordervox'
-											) }
-										</span>
-									) }
-									<Button
-										variant="link"
-										onClick={ () =>
-											setEditing( alert.key )
-										}
-									>
-										{ __( 'Edit message', 'ordervox' ) }
-									</Button>
-								</div>
-								{ alert.key === 'daily_summary' &&
-									alert.enabled && (
-										<div className="ordervox-alerts__time">
-											<TextControl
-												label={ __(
-													'Send at (site time)',
-													'ordervox'
-												) }
-												type="time"
-												value={ summaryTime }
-												onChange={ setSummaryTime }
-												onBlur={ () =>
-													run( () =>
-														saveSettings( {
-															settings: {
-																daily_summary: {
-																	time: summaryTime,
-																},
-															},
-														} )
-													)
-												}
-												__nextHasNoMarginBottom
-												__next40pxDefaultSize
-											/>
-										</div>
-									) }
-							</li>
-						) ) }
+						{ data.alerts
+							.filter( ( a ) => a.audience === 'store' )
+							.map( renderAlert ) }
+					</ul>
+				</CardBody>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<h2>{ __( 'Customer messages', 'ordervox' ) }</h2>
+				</CardHeader>
+				<CardBody>
+					<p>
+						{ __(
+							'Customers only get WhatsApp messages if they tick the opt-in box at checkout or in their account. Every message tells them they can reply STOP to unsubscribe.',
+							'ordervox'
+						) }
+					</p>
+					<ToggleControl
+						label={ __(
+							'Show the WhatsApp opt-in at checkout',
+							'ordervox'
+						) }
+						help={ __(
+							'Adds an unticked checkbox to the classic and block checkout, and to My Account.',
+							'ordervox'
+						) }
+						checked={ !! customer.optin_enabled }
+						disabled={ busy }
+						onChange={ ( value ) =>
+							saveSetting( 'customer.optin_enabled', value )
+						}
+						__nextHasNoMarginBottom
+					/>
+					{ customer.optin_enabled && (
+						<div className="ordervox-optin-settings">
+							<TextControl
+								label={ __( 'Checkbox text', 'ordervox' ) }
+								placeholder={ __(
+									'Send me order updates on WhatsApp',
+									'ordervox'
+								) }
+								value={ optinLabel }
+								onChange={ setOptinLabel }
+								onBlur={ () =>
+									saveSetting(
+										'customer.optin_label',
+										optinLabel
+									)
+								}
+								__nextHasNoMarginBottom
+								__next40pxDefaultSize
+							/>
+							<ToggleControl
+								label={ __(
+									'Also ask for consent to offers and reminders',
+									'ordervox'
+								) }
+								help={ __(
+									'A second, separate checkbox. Needed for abandoned cart and review reminders in Ordervox Pro.',
+									'ordervox'
+								) }
+								checked={ !! customer.marketing_optin }
+								disabled={ busy }
+								onChange={ ( value ) =>
+									saveSetting(
+										'customer.marketing_optin',
+										value
+									)
+								}
+								__nextHasNoMarginBottom
+							/>
+						</div>
+					) }
+					<ul className="ordervox-alerts">
+						{ data.alerts
+							.filter( ( a ) => a.audience === 'customer' )
+							.map( renderAlert ) }
 					</ul>
 				</CardBody>
 			</Card>

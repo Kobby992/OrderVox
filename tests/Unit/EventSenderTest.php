@@ -138,6 +138,38 @@ final class EventSenderTest extends TestCase {
 		$this->assertCount( 1, $this->messages->rows );
 	}
 
+	public function test_customer_alert_goes_only_to_consenting_customer(): void {
+		$this->options[ Settings::OPTION ]['customer'] = array( 'notify_confirmed' => true );
+
+		$templates = new TemplateRepository();
+		$templates->set_submitted(
+			'customer_order_confirmed',
+			'en_US',
+			array(
+				'name'     => 'ordervox_customer_order_confirmed_v1',
+				'language' => 'en_US',
+				'keys'     => array(),
+				'status'   => 'APPROVED',
+				'version'  => 1,
+			)
+		);
+
+		$order   = \Mockery::mock( 'WC_Order' );
+		$consent = \Mockery::mock( \Webbcode\Ordervox\Customer\Consent::class );
+		$consent->shouldReceive( 'recipient' )->with( $order )->andReturn( '+447911123456', null );
+
+		$queue  = new Queue( $this->messages, new WhatsAppApi( new Credentials( new Crypto( str_repeat( 'k', 32 ) ) ) ) );
+		$sender = new EventSender( new Settings(), $templates, new Registry(), new Dispatcher( $this->messages, $queue ), $this->messages, $consent );
+
+		$this->assertSame( 1, $sender->send( 'customer_order_confirmed', new Context( $order ), 'order', 1001, 'confirmed' ) );
+		$this->assertSame( 'customer', $this->messages->find( 1 )['recipient_type'] );
+		$this->assertSame( '+447911123456', $this->messages->find( 1 )['recipient_phone'] );
+
+		// Without consent nothing is sent and nothing is logged.
+		$this->assertSame( 0, $sender->send( 'customer_order_confirmed', new Context( $order ), 'order', 1002, 'confirmed' ) );
+		$this->assertCount( 1, $this->messages->rows );
+	}
+
 	public function test_recipients_filter_adds_team_members(): void {
 		Filters\expectApplied( 'ordervox_recipients' )->once()->andReturnUsing(
 			static fn( array $recipients ) => array_merge(

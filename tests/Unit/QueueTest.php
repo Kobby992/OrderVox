@@ -131,6 +131,32 @@ final class QueueTest extends HttpTestCase {
 		$this->assertCount( 0, $this->scheduled );
 	}
 
+	public function test_customer_who_unsubscribed_is_not_messaged(): void {
+		Functions\when( '__' )->returnArg();
+		$optouts = new \Webbcode\Ordervox\Tests\Unit\Fakes\InMemoryOptOuts();
+		$queue   = new Queue(
+			$this->messages,
+			new WhatsAppApi(
+				$this->credentials(
+					array(
+						'phone_number_id' => '111',
+						'access_token'    => 'EAAG-token',
+					)
+				)
+			),
+			$optouts
+		);
+		$id = ( new Dispatcher( $this->messages, $queue ) )->dispatch(
+			new OutboundMessage( 'customer_order_confirmed', '+2348012345678', 'ordervox_customer_order_confirmed_v1', 'en_US', array(), 'customer', 'order', 1001 )
+		);
+		$optouts->add( '+2348012345678', 'keyword' );
+
+		$row = $queue->process( $id );
+
+		$this->assertSame( 'cancelled', $row['status'] );
+		$this->assertCount( 0, $this->requests );
+	}
+
 	public function test_already_sent_row_is_not_sent_again(): void {
 		$id = $this->dispatcher->dispatch( $this->message() );
 		$this->messages->update( $id, array( 'status' => 'sent' ) );

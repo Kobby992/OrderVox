@@ -21,6 +21,7 @@ const STATUS_OPTIONS = [
 	{ value: 'delivered', label: __( 'Delivered', 'ordervox' ) },
 	{ value: 'read', label: __( 'Read', 'ordervox' ) },
 	{ value: 'failed', label: __( 'Failed', 'ordervox' ) },
+	{ value: 'cancelled', label: __( 'Cancelled', 'ordervox' ) },
 ];
 
 /**

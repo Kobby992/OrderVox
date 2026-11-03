@@ -167,6 +167,52 @@ class MessageRepository {
 	}
 
 	/**
+	 * Cancels messages still waiting to be sent to a number.
+	 *
+	 * @param string $e164 Number in E.164.
+	 * @return int Rows cancelled.
+	 */
+	public function cancel_queued_for( string $e164 ): int {
+		global $wpdb;
+		return (int) $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE %i SET status = 'cancelled', error_message = %s, updated_at = %s WHERE recipient_phone = %s AND status = 'queued'",
+				$this->table(),
+				__( 'Cancelled because the customer unsubscribed.', 'ordervox' ),
+				self::now(),
+				$e164
+			)
+		);
+	}
+
+	/**
+	 * Rows sent to a number, for privacy exports.
+	 *
+	 * @param string $e164  Number in E.164.
+	 * @param int    $limit Maximum rows.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function for_phone( string $e164, int $limit = 500 ): array {
+		global $wpdb;
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( 'SELECT * FROM %i WHERE recipient_phone = %s ORDER BY id DESC LIMIT %d', $this->table(), $e164, $limit ),
+			ARRAY_A
+		);
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Deletes rows sent to a number, for privacy erasure.
+	 *
+	 * @param string $e164 Number in E.164.
+	 * @return int Rows deleted.
+	 */
+	public function delete_for_phone( string $e164 ): int {
+		global $wpdb;
+		return (int) $wpdb->delete( $this->table(), array( 'recipient_phone' => $e164 ) );
+	}
+
+	/**
 	 * Deletes rows older than the given number of days, in batches.
 	 *
 	 * @param int $days Retention in days. 0 keeps everything.
