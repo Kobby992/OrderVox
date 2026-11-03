@@ -6,6 +6,7 @@ import { Spinner, TabPanel } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 import { getSettings } from './api';
+import Alerts from './components/Alerts';
 import Dashboard from './components/Dashboard';
 import MessageLog from './components/MessageLog';
 import SetupWizard from './components/SetupWizard';
@@ -14,6 +15,7 @@ import './admin.scss';
 
 const TABS = [
 	{ name: 'dashboard', title: __( 'Dashboard', 'ordervox' ) },
+	{ name: 'alerts', title: __( 'Alerts', 'ordervox' ) },
 	{ name: 'setup', title: __( 'Setup', 'ordervox' ) },
 	{ name: 'log', title: __( 'Message log', 'ordervox' ) },
 ];
@@ -59,6 +61,7 @@ function App() {
 									onDone={ () => openTab( 'dashboard' ) }
 								/>
 							) }
+							{ tab.name === 'alerts' && <Alerts /> }
 							{ tab.name === 'log' && <MessageLog /> }
 						</div>
 					) }

@@ -23,7 +23,7 @@ function ordervox_uninstall_site() {
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . $table ) );
 	}
 
-	foreach ( array( 'ordervox_settings', 'ordervox_credentials', 'ordervox_db_version' ) as $option ) {
+	foreach ( array( 'ordervox_settings', 'ordervox_credentials', 'ordervox_db_version', 'ordervox_templates', 'ordervox_health', 'ordervox_webhook_last_at', 'ordervox_quality_update' ) as $option ) {
 		delete_option( $option );
 	}
 

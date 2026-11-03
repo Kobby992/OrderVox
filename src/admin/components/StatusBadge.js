@@ -10,6 +10,12 @@ const LABELS = {
 	ok: __( 'OK', 'ordervox' ),
 	warning: __( 'Needs attention', 'ordervox' ),
 	error: __( 'Problem', 'ordervox' ),
+	APPROVED: __( 'Approved', 'ordervox' ),
+	PENDING: __( 'Pending review', 'ordervox' ),
+	REJECTED: __( 'Rejected', 'ordervox' ),
+	PAUSED: __( 'Paused', 'ordervox' ),
+	DISABLED: __( 'Disabled', 'ordervox' ),
+	none: __( 'Not created', 'ordervox' ),
 };
 
 /**

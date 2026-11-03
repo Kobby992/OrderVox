@@ -8,18 +8,27 @@
 namespace Webbcode\Ordervox;
 
 use Webbcode\Ordervox\Admin\Menu;
+use Webbcode\Ordervox\Admin\OrderScreen;
 use Webbcode\Ordervox\Api\WhatsAppApi;
+use Webbcode\Ordervox\Events\CatalogEvents;
+use Webbcode\Ordervox\Events\DailySummary;
+use Webbcode\Ordervox\Events\EventSender;
+use Webbcode\Ordervox\Events\OrderEvents;
 use Webbcode\Ordervox\Health\HealthCheck;
 use Webbcode\Ordervox\Health\Maintenance;
 use Webbcode\Ordervox\Log\MessageRepository;
 use Webbcode\Ordervox\Messaging\Dispatcher;
 use Webbcode\Ordervox\Messaging\Queue;
 use Webbcode\Ordervox\Migrations\Migrator;
+use Webbcode\Ordervox\Placeholders\Registry;
 use Webbcode\Ordervox\Rest\AdminController;
+use Webbcode\Ordervox\Rest\AlertsController;
 use Webbcode\Ordervox\Settings\Credentials;
 use Webbcode\Ordervox\Settings\Settings;
 use Webbcode\Ordervox\Support\Crypto;
 use Webbcode\Ordervox\Support\Requirements;
+use Webbcode\Ordervox\Templates\TemplateManager;
+use Webbcode\Ordervox\Templates\TemplateRepository;
 use Webbcode\Ordervox\Webhook\Controller as WebhookController;
 use Webbcode\Ordervox\Webhook\Processor;
 
@@ -83,9 +92,15 @@ final class Plugin {
 		$this->maintenance()->register();
 		( new WebhookController( $this->credentials(), new Processor( $this->messages() ) ) )->register();
 		$this->admin_controller()->register();
+		$this->template_manager()->register();
+		( new OrderEvents( $this->event_sender() ) )->register();
+		( new CatalogEvents( $this->event_sender() ) )->register();
+		$this->daily_summary()->register();
+		( new AlertsController( $this->settings(), $this->templates(), $this->template_manager(), $this->placeholders(), $this->daily_summary() ) )->register();
 
 		if ( is_admin() ) {
 			( new Menu() )->register();
+			( new OrderScreen( $this->messages() ) )->register();
 		}
 
 		/**
@@ -143,6 +158,41 @@ final class Plugin {
 	 */
 	public function health(): HealthCheck {
 		return $this->service( 'health', fn() => new HealthCheck( $this->credentials(), $this->settings(), $this->api(), $this->messages() ) );
+	}
+
+	/**
+	 * Placeholder definitions.
+	 */
+	public function placeholders(): Registry {
+		return $this->service( 'placeholders', static fn() => new Registry() );
+	}
+
+	/**
+	 * Stored alert templates.
+	 */
+	public function templates(): TemplateRepository {
+		return $this->service( 'templates', static fn() => new TemplateRepository() );
+	}
+
+	/**
+	 * Creates and syncs templates with Meta.
+	 */
+	public function template_manager(): TemplateManager {
+		return $this->service( 'template_manager', fn() => new TemplateManager( $this->api(), $this->templates(), $this->placeholders() ) );
+	}
+
+	/**
+	 * Sends store alerts.
+	 */
+	public function event_sender(): EventSender {
+		return $this->service( 'event_sender', fn() => new EventSender( $this->settings(), $this->templates(), $this->placeholders(), $this->dispatcher(), $this->messages() ) );
+	}
+
+	/**
+	 * Daily summary.
+	 */
+	public function daily_summary(): DailySummary {
+		return $this->service( 'daily_summary', fn() => new DailySummary( $this->event_sender(), $this->settings() ) );
 	}
 
 	/**

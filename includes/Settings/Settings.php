@@ -47,6 +47,7 @@ final class Settings {
 		return array(
 			'owner_phone'              => '',
 			'events'                   => self::EVENTS,
+			'template_language'        => '',
 			'daily_summary'            => array(
 				'enabled' => false,
 				'time'    => '08:00',

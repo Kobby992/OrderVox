@@ -458,7 +458,7 @@ export default function SetupWizard( { onDone } ) {
 						{ templates && templates.length === 0 && (
 							<Notice status="warning" isDismissible={ false }>
 								{ __(
-									'No approved templates found in this WhatsApp Business Account. New accounts include "hello_world"; Ordervox creates its own templates in the next step of setup.',
+									'No approved templates found in this WhatsApp Business Account. New accounts include "hello_world". Create the Ordervox alert templates on the Alerts tab.',
 									'ordervox'
 								) }
 							</Notice>

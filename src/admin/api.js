@@ -54,3 +54,44 @@ export const resendMessage = ( id ) =>
  */
 export const errorMessage = ( error ) =>
 	error?.message || 'Something went wrong. Please try again.';
+
+export const getAlerts = () => apiFetch( { path: `${ base }/alerts` } );
+
+export const createMissingTemplates = () =>
+	apiFetch( {
+		path: `${ base }/alerts/templates/create-missing`,
+		method: 'POST',
+	} );
+
+export const syncTemplates = () =>
+	apiFetch( { path: `${ base }/alerts/templates/sync`, method: 'POST' } );
+
+export const getAlertTemplate = ( alert ) =>
+	apiFetch( { path: `${ base }/alerts/${ alert }/template` } );
+
+export const saveAlertTemplate = ( alert, data ) =>
+	apiFetch( {
+		path: `${ base }/alerts/${ alert }/template`,
+		method: 'POST',
+		data,
+	} );
+
+export const submitAlertTemplate = ( alert, data ) =>
+	apiFetch( {
+		path: `${ base }/alerts/${ alert }/template/submit`,
+		method: 'POST',
+		data,
+	} );
+
+export const resetAlertTemplate = ( alert ) =>
+	apiFetch( {
+		path: `${ base }/alerts/${ alert }/template/reset`,
+		method: 'POST',
+	} );
+
+export const previewAlertTemplate = ( alert, data ) =>
+	apiFetch( {
+		path: `${ base }/alerts/${ alert }/template/preview`,
+		method: 'POST',
+		data,
+	} );
