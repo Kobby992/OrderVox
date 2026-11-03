@@ -1,0 +1,16 @@
+/.git
+/.github
+/node_modules
+/vendor
+/tests
+/.distignore
+/.editorconfig
+/.gitignore
+/.wp-env.json
+/composer.json
+/composer.lock
+/package-lock.json
+/phpcs.xml.dist
+/phpstan.neon.dist
+/phpunit.xml.dist
+/ORDERVOX-BUILD-SPEC.md

@@ -1,0 +1,50 @@
+{
+	"name": "webbcode/ordervox",
+	"description": "Order notifications via WhatsApp for WooCommerce, using the official WhatsApp Cloud API.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Webbcode Studios"
+		}
+	],
+	"require": {
+		"php": ">=8.1"
+	},
+	"require-dev": {
+		"brain/monkey": "^2.6",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+		"php-stubs/woocommerce-stubs": ">=9.0",
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"phpstan/phpstan": "^2.1",
+		"phpunit/phpunit": "^9.6",
+		"szepeviktor/phpstan-wordpress": "^2.0",
+		"wp-coding-standards/wpcs": "^3.1",
+		"yoast/phpunit-polyfills": "^3.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Webbcode\\Ordervox\\": "includes/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Webbcode\\Ordervox\\Tests\\": "tests/"
+		}
+	},
+	"scripts": {
+		"lint": "phpcs",
+		"lint:fix": "phpcbf",
+		"analyse": "phpstan analyse --memory-limit=1G",
+		"test": "phpunit"
+	},
+	"config": {
+		"platform": {
+			"php": "8.1"
+		},
+		"sort-packages": true,
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}

@@ -1,0 +1,38 @@
+{
+	"name": "ordervox",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Order notifications via WhatsApp for WooCommerce.",
+	"author": "Webbcode Studios",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"build": "wp-scripts build admin=./src/admin/index.js",
+		"start": "wp-scripts start admin=./src/admin/index.js",
+		"lint:js": "wp-scripts lint-js src",
+		"lint:css": "wp-scripts lint-style \"src/**/*.scss\"",
+		"env:start": "wp-env start",
+		"env:stop": "wp-env stop",
+		"test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/ordervox composer test",
+		"make-pot": "wp-env run cli wp i18n make-pot wp-content/plugins/ordervox wp-content/plugins/ordervox/languages/ordervox.pot --exclude=node_modules,vendor,build,tests",
+		"plugin-zip": "wp-scripts plugin-zip"
+	},
+	"devDependencies": {
+		"@wordpress/env": "^12.0.0",
+		"@wordpress/scripts": "^37.0.0"
+	},
+	"files": [
+		"ordervox.php",
+		"uninstall.php",
+		"readme.txt",
+		"includes",
+		"build",
+		"src",
+		"languages",
+		"vendor-prefixed"
+	],
+	"dependencies": {
+		"@wordpress/components": "^43.0.0",
+		"@wordpress/element": "^10.0.0",
+		"@wordpress/i18n": "^7.0.0"
+	}
+}

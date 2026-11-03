@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<ruleset name="Ordervox">
+	<description>Coding standards for Ordervox.</description>
+
+	<file>.</file>
+	<exclude-pattern>/build/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/vendor-prefixed/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<config name="testVersion" value="8.1-"/>
+	<config name="minimum_wp_version" value="6.6"/>
+
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress-Extra">
+		<!-- Classes follow PSR-4 file names (includes/Settings/Settings.php), not class-*.php. -->
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+	<rule ref="WordPress-Docs">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="ordervox"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="ordervox"/>
+				<element value="Webbcode\Ordervox"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Tests use PHPUnit's camelCase API. -->
+	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+</ruleset>
