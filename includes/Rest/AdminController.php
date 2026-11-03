@@ -175,7 +175,7 @@ final class AdminController {
 		$credentials = (array) $request->get_param( 'credentials' );
 
 		if ( isset( $settings['owner_phone'] ) && '' !== trim( (string) $settings['owner_phone'] ) ) {
-			$phone = Phone::to_e164( (string) $settings['owner_phone'], Phone::calling_code() );
+			$phone = Phone::normalise( (string) $settings['owner_phone'] );
 			if ( null === $phone ) {
 				return new \WP_Error( 'ordervox_invalid_phone', __( 'Enter the alert number in international format, for example +14155550123.', 'ordervox' ), array( 'status' => 400 ) );
 			}
@@ -258,7 +258,7 @@ final class AdminController {
 	public function send_test_message( \WP_REST_Request $request ) {
 		$raw   = (string) ( $request->get_param( 'phone' ) ?? '' );
 		$raw   = '' !== $raw ? $raw : (string) $this->settings->get( 'owner_phone' );
-		$phone = Phone::to_e164( $raw, Phone::calling_code() );
+		$phone = Phone::normalise( $raw );
 		if ( null === $phone ) {
 			return new \WP_Error( 'ordervox_invalid_phone', __( 'Enter a valid WhatsApp number in international format.', 'ordervox' ), array( 'status' => 400 ) );
 		}

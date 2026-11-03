@@ -243,7 +243,10 @@ export default function TemplateEditor( { alert, onClose } ) {
 										) }
 							</p>
 							<div className="ordervox-bubble">
-								<div className="ordervox-bubble__text">
+								<div
+									className="ordervox-bubble__text"
+									aria-live="polite"
+								>
 									{ preview ? preview.text : body }
 								</div>
 								{ footer && (

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" width="1544" height="500">
+	<defs>
+		<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#3B2A8C"/>
+			<stop offset="1" stop-color="#170F3A"/>
+		</linearGradient>
+	</defs>
+	<rect width="1544" height="500" fill="url(#bg)"/>
+	<circle cx="1380" cy="80" r="260" fill="#FFFFFF" opacity="0.04"/>
+	<circle cx="1480" cy="460" r="180" fill="#FF7A59" opacity="0.08"/>
+
+	<g transform="translate(120 122)">
+		<rect width="256" height="256" rx="56" fill="#FFFFFF" opacity="0.08"/>
+		<g transform="translate(-16 0)">
+		<path d="M62 104 L118 80 L174 104 L174 170 L118 194 L62 170 Z" fill="#FFFFFF"/>
+		<path d="M62 104 L118 128 L174 104" fill="none" stroke="#3B2A8C" stroke-width="8" stroke-linejoin="round"/>
+		<path d="M118 128 L118 194" stroke="#3B2A8C" stroke-width="8"/>
+		<path d="M90 92 L146 116" stroke="#3B2A8C" stroke-width="8" stroke-linecap="round"/>
+		<path d="M190 112 a22 22 0 0 1 0 44" fill="none" stroke="#FF7A59" stroke-width="10" stroke-linecap="round"/>
+		<path d="M204 96 a44 44 0 0 1 0 76" fill="none" stroke="#FF7A59" stroke-width="10" stroke-linecap="round" opacity="0.75"/>
+		</g>
+	</g>
+
+	<text x="440" y="235" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="112" font-weight="700" fill="#FFFFFF" letter-spacing="-2">Ordervox</text>
+	<text x="444" y="305" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="40" fill="#D9D3F5">Store alerts and customer updates, delivered on WhatsApp</text>
+	<g font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" fill="#FFFFFF">
+		<rect x="444" y="345" width="250" height="48" rx="24" fill="#FF7A59"/>
+		<text x="569" y="378" text-anchor="middle" font-weight="600">Official Cloud API</text>
+		<rect x="710" y="345" width="196" height="48" rx="24" fill="none" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="2"/>
+		<text x="808" y="378" text-anchor="middle">HPOS ready</text>
+		<rect x="922" y="345" width="236" height="48" rx="24" fill="none" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="2"/>
+		<text x="1040" y="378" text-anchor="middle">Block checkout</text>
+	</g>
+</svg>

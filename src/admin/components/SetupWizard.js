@@ -256,6 +256,7 @@ export default function SetupWizard( { onDone } ) {
 								'is-current': index === step,
 								'is-done': index < step,
 							} ) }
+							aria-current={ index === step ? 'step' : undefined }
 						>
 							{ label }
 						</li>
@@ -530,7 +531,10 @@ export default function SetupWizard( { onDone } ) {
 						) }
 						{ ! templates && busy && <Spinner /> }
 						{ testRow && (
-							<p className="ordervox-test-status">
+							<p
+								className="ordervox-test-status"
+								aria-live="polite"
+							>
 								<StatusBadge status={ testRow.status } />{ ' ' }
 								{ testRow.status === 'read' ||
 								testRow.status === 'delivered'

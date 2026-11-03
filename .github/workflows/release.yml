@@ -1,0 +1,89 @@
+name: Release
+
+# Builds the installable plugin zip: production Composer packages prefixed with Strauss,
+# compiled admin app, translation template. Runs the official Plugin Check on the result.
+# Tags (v1.2.3) also publish a GitHub release, and deploy to WordPress.org once the
+# WPORG_DEPLOY repository variable is "true" and the SVN secrets are set.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  STRAUSS_VERSION: '0.31.1'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer, wp-cli
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check versions match the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          grep -q "^ \* Version: *${version}$" ordervox.php
+          grep -q "^Stable tag: ${version}$" readme.txt
+          grep -q "define( 'ORDERVOX_VERSION', '${version}' );" ordervox.php
+
+      - name: Install production Composer packages
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Prefix bundled libraries with Strauss
+        run: |
+          curl -sSL -o strauss.phar "https://github.com/BrianHenryIE/strauss/releases/download/${STRAUSS_VERSION}/strauss.phar"
+          php strauss.phar
+          test -f vendor-prefixed/autoload.php
+
+      - name: Build admin app
+        run: |
+          npm ci
+          npm run build
+
+      - name: Generate translation template
+        run: wp i18n make-pot . languages/ordervox.pot --domain=ordervox --exclude=node_modules,vendor,vendor-prefixed,build,tests,.wordpress-org
+
+      - name: Package
+        run: |
+          npm run plugin-zip
+          mkdir -p dist
+          unzip -q ordervox.zip -d dist
+
+      - name: Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: dist/ordervox
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ordervox
+          path: ordervox.zip
+
+      - name: GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ordervox.zip
+          generate_release_notes: true
+
+      - name: Deploy to WordPress.org
+        if: startsWith(github.ref, 'refs/tags/v') && vars.WPORG_DEPLOY == 'true'
+        uses: 10up/action-wordpress-plugin-deploy@2.3.0
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: ordervox
+          BUILD_DIR: dist/ordervox
+          ASSETS_DIR: .wordpress-org

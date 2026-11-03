@@ -12,13 +12,40 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Normalises phone numbers to E.164 (`+` and 8–15 digits).
  *
- * This is a lightweight normaliser; full per-country validation with libphonenumber
- * (scoped with Strauss) replaces it when customer numbers arrive in Phase 3.
+ * Release builds bundle libphonenumber under the plugin's own namespace (see `extra.strauss` in
+ * composer.json) for per-country parsing. Without it, a lightweight rule-based normaliser is used.
  */
 final class Phone {
 
+	private const LIB_UTIL   = '\\Webbcode\\Ordervox\\Vendor\\libphonenumber\\PhoneNumberUtil';
+	private const LIB_FORMAT = '\\Webbcode\\Ordervox\\Vendor\\libphonenumber\\PhoneNumberFormat';
+
 	/**
-	 * Converts a raw number to E.164, or null when it cannot be a valid number.
+	 * Converts a number to E.164 using the rules of a country, or null when it cannot be a valid number.
+	 *
+	 * @param string $raw     Number as typed.
+	 * @param string $country ISO 3166-1 alpha-2 country for national numbers. Defaults to the store's country.
+	 */
+	public static function normalise( string $raw, string $country = '' ): ?string {
+		$country = strtoupper( '' !== $country ? $country : self::base_country() );
+
+		if ( '' !== $country && class_exists( self::LIB_UTIL ) && function_exists( 'mb_substr' ) ) {
+			try {
+				$util   = call_user_func( array( self::LIB_UTIL, 'getInstance' ) );
+				$number = $util->parse( $raw, $country );
+				// "Possible" (right length for the country) rather than "valid", so numbers in newly
+				// allocated ranges are not rejected by older metadata.
+				return $util->isPossibleNumber( $number ) ? $util->format( $number, constant( self::LIB_FORMAT . '::E164' ) ) : null;
+			} catch ( \Throwable $e ) {
+				return null;
+			}
+		}
+
+		return self::to_e164( $raw, self::calling_code( $country ) );
+	}
+
+	/**
+	 * Converts a raw number to E.164 with simple rules, or null when it cannot be a valid number.
 	 *
 	 * @param string $raw          Number as typed.
 	 * @param string $calling_code Default country calling code without `+`, e.g. `234`, used for national numbers.
@@ -70,6 +97,13 @@ final class Phone {
 		$code    = WC()->countries->get_country_calling_code( $country );
 		$code    = is_array( $code ) ? (string) reset( $code ) : (string) $code;
 		return ltrim( $code, '+' );
+	}
+
+	/**
+	 * The WooCommerce store's country code, or '' outside WooCommerce.
+	 */
+	private static function base_country(): string {
+		return function_exists( 'WC' ) && WC()->countries ? (string) WC()->countries->get_base_country() : '';
 	}
 
 	/**

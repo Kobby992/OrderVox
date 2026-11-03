@@ -122,7 +122,7 @@ class Consent {
 	 * @param \WC_Order $order Order.
 	 */
 	public function phone( \WC_Order $order ): ?string {
-		return Phone::to_e164( $order->get_billing_phone(), Phone::calling_code( $order->get_billing_country() ) );
+		return Phone::normalise( $order->get_billing_phone(), $order->get_billing_country() );
 	}
 
 	/**
@@ -176,7 +176,7 @@ class Consent {
 		}
 
 		$customer = new \WC_Customer( $user_id );
-		$phone    = Phone::to_e164( $customer->get_billing_phone(), Phone::calling_code( $customer->get_billing_country() ) );
+		$phone    = Phone::normalise( $customer->get_billing_phone(), $customer->get_billing_country() );
 		if ( null === $phone ) {
 			return;
 		}

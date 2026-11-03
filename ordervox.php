@@ -2,7 +2,7 @@
 /**
  * Plugin Name:          Ordervox – Order Notifications via WhatsApp for WooCommerce
  * Description:          Sends WooCommerce order, payment, stock and review alerts to WhatsApp through the official WhatsApp Cloud API.
- * Version:              0.1.0
+ * Version:              1.0.0
  * Requires at least:    6.6
  * Requires PHP:         8.1
  * Requires Plugins:     woocommerce
@@ -21,7 +21,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ORDERVOX_VERSION', '0.1.0' );
+define( 'ORDERVOX_VERSION', '1.0.0' );
 define( 'ORDERVOX_FILE', __FILE__ );
 define( 'ORDERVOX_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ORDERVOX_URL', plugin_dir_url( __FILE__ ) );

@@ -79,7 +79,38 @@ final class Maintenance {
 	public function run(): void {
 		$this->messages->purge_older_than( (int) $this->settings->get( 'log_retention_days', 30 ) );
 		Processor::purge_events();
-		$this->health->run();
+
+		$previous = HealthCheck::last();
+		$current  = $this->health->run();
+		if ( 'error' === $current['status'] && 'error' !== ( $previous['status'] ?? '' ) ) {
+			$this->email_admin( $current );
+		}
+	}
+
+	/**
+	 * Emails the site admin when the connection first breaks, listing the problems.
+	 *
+	 * @param array<string, mixed> $result Health check result.
+	 */
+	private function email_admin( array $result ): void {
+		$problems = array();
+		foreach ( (array) $result['checks'] as $check ) {
+			if ( 'error' === ( $check['status'] ?? '' ) ) {
+				$problems[] = '- ' . $check['message'];
+			}
+		}
+
+		wp_mail(
+			(string) get_option( 'admin_email' ),
+			sprintf(
+				/* translators: %s: site name. */
+				__( '[%s] WhatsApp notifications may not be sending', 'ordervox' ),
+				wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES )
+			),
+			__( 'Ordervox found a problem with your WhatsApp connection:', 'ordervox' ) . "\n\n"
+				. implode( "\n", $problems ) . "\n\n"
+				. __( 'Check the connection:', 'ordervox' ) . ' ' . admin_url( 'admin.php?page=' . Menu::SLUG )
+		);
 	}
 
 	/**

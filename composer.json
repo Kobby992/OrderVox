@@ -9,7 +9,8 @@
 		}
 	],
 	"require": {
-		"php": ">=8.1"
+		"php": ">=8.1",
+		"giggsey/libphonenumber-for-php-lite": "^9.0"
 	},
 	"require-dev": {
 		"brain/monkey": "^2.6",
@@ -36,7 +37,25 @@
 		"lint": "phpcs",
 		"lint:fix": "phpcbf",
 		"analyse": "phpstan analyse --memory-limit=1G",
-		"test": "phpunit"
+		"test": "phpunit",
+		"prefix-namespaces": "php strauss.phar"
+	},
+	"extra": {
+		"strauss": {
+			"target_directory": "vendor-prefixed",
+			"namespace_prefix": "Webbcode\\Ordervox\\Vendor\\",
+			"classmap_prefix": "Ordervox_Vendor_",
+			"constant_prefix": "ORDERVOX_VENDOR_",
+			"packages": [
+				"giggsey/libphonenumber-for-php-lite"
+			],
+			"exclude_from_copy": {
+				"packages": [
+					"symfony/polyfill-mbstring"
+				]
+			},
+			"delete_vendor_packages": false
+		}
 	},
 	"config": {
 		"platform": {

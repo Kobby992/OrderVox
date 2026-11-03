@@ -14,3 +14,7 @@
 /phpstan.neon.dist
 /phpunit.xml.dist
 /ORDERVOX-BUILD-SPEC.md
+/.wordpress-org
+/CLAUDE.md
+/strauss.phar
+/dist

@@ -5,3 +5,5 @@
 /.phpunit.result.cache
 /*.zip
 .DS_Store
+/strauss.phar
+/dist/
